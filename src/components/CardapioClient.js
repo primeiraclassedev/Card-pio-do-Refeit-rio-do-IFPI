@@ -455,7 +455,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
             <span>
               Desenvolvido por{' '}
               <a
-                href="https://github.com"
+                href="https://primeiraclasse.dev.br"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white fw-bold text-decoration-underline"
