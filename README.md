@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ Cardápio Refeitório IFPI – Campus Teresina Central
 
-## Getting Started
+Aplicação web responsiva (*mobile-first*) desenvolvida para facilitar o acesso dos estudantes e servidores ao cardápio semanal do **Refeitório Estudantil do Instituto Federal do Piauí (IFPI) – Campus Teresina Central**, contando com painel administrativo protegido para gestão diária das refeições.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Funcionalidades
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🌐 Área Pública (Estudantes e Servidores)
+* **Status em Tempo Real:** Banner dinâmico sincronizado com o fuso horário de Teresina (`America/Fortaleza`) indicando se o refeitório está **Aberto Agora** ou **Fechado**, além do horário da próxima refeição.
+* **Navegação Semanal (Segunda a Sexta):** Seleção rápida entre os dias úteis da semana vigente com destaque automático para o dia atual.
+* **Exibição de Almoço e Jantar:** Listagem clara e visual das porções servidas em cada turno (`11h30 às 13h30` e `17h00 às 19h00`).
+* **Aviso de Dias Não Letivos:** Exibição automática de justificativa em datas de feriados, recessos ou paralisações.
+* **Compartilhamento Rápido:** Botão integrado para enviar o cardápio formatado diretamente via **WhatsApp** ou compartilhar o link nativamente.
+* **SEO Otimizado:** Renderização no servidor (SSR) e dados estruturados (`Schema.org / FoodEstablishment`).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 🔐 Painel Administrativo (`/admin`)
+* **Autenticação Segura:** Login de administradores via **Supabase Auth** com proteção de rotas no servidor (`src/proxy.js`).
+* **Gestão de Refeições:** Cadastro, edição e exclusão de almoços e jantares da semana vigente.
+* **Catálogo de Porções:** Gerenciamento reutilizável de pratos e acompanhamentos com seletor de ícones.
+* **Controle de Dias Não Letivos:** Registro de datas sem funcionamento e seus respectivos motivos.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Tecnologias Utilizadas
 
-To learn more about Next.js, take a look at the following resources:
+* **Frontend & Framework:** [Next.js 16 (App Router)](https://nextjs.org/) & [React](https://react.dev/)
+* **Estilização:** [Bootstrap 5.3](https://getbootstrap.com/) & [Bootstrap Icons](https://icons.getbootstrap.com/)
+* **Backend & Banco de Dados:** [Supabase](https://supabase.com/) (PostgreSQL com *Row Level Security* e Supabase Auth)
+* **Deploy:** [Vercel](https://vercel.com/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 👨‍💻 Desenvolvimento
+Desenvolvido por Primeira Classe - Desenvolvimento de Sistemas.
