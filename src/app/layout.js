@@ -6,9 +6,10 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Cardápio Refeitório IFPI | Campus Teresina Central',
+  metadataBase: new URL('https://refeitoriodoifpi.vercel.app/'),
+  title: 'Cardápio Semanal – Refeitório IFPI Campus Teresina Central',
   description:
-    'Confira o cardápio semanal atualizado do refeitório do IFPI – Campus Teresina Central. Veja o horário de funcionamento, almoço e jantar de segunda a sexta-feira.',
+    'Confira o cardápio hoje no almoço e jantar do refeitório do IFPI Campus Teresina Central',
   keywords: [
     'cardápio refeitório IFPI',
     'almoço IFPI Teresina Central',
@@ -16,11 +17,26 @@ export const metadata = {
     'restaurante estudantil IFPI',
   ],
   openGraph: {
-    title: 'Cardápio da Semana – Refeitório IFPI (Campus Teresina Central)',
+    title: 'Cardápio Semanal – Refeitório IFPI Campus Teresina Central',
     description:
-      'Veja o que será servido hoje no almoço e jantar do refeitório do IFPI Campus Teresina Central.',
+      'Confira o cardápio hoje no almoço e jantar do refeitório do IFPI Campus Teresina Central',
     locale: 'pt_BR',
     type: 'website',
+    images: [
+      {
+        url: '/banner_refeitorio.png', // Nome do arquivo salvo dentro da pasta public/
+        width: 1200,
+        height: 630,
+        alt: 'Cardápio Refeitório IFPI – Campus Teresina Central',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cardápio Semanal – Refeitório IFPI Campus Teresina Central',
+    description:
+      'Confira o cardápio hoje no almoço e jantar do refeitório do IFPI Campus Teresina Central',
+    images: ['/banner_refeitorio.png'],
   },
 };
 
