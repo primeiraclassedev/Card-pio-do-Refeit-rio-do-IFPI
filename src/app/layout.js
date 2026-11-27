@@ -16,6 +16,9 @@ export const metadata = {
     'janta IFPI',
     'restaurante estudantil IFPI',
   ],
+  verification: {
+    google: 'ke2QaduEXzNwkUWWeBkWdTh0-ya9e6Oetc4Hmac4Ods',
+  },
   openGraph: {
     title: 'Cardápio Semanal – Refeitório IFPI Campus Teresina Central',
     description:
