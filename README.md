@@ -9,7 +9,7 @@ Aplicação web responsiva (*mobile-first*) desenvolvida para facilitar o acesso
 ### 🌐 Área Pública (Estudantes e Servidores)
 * **Status em Tempo Real:** Banner dinâmico sincronizado com o fuso horário de Teresina (`America/Fortaleza`) indicando se o refeitório está **Aberto Agora** ou **Fechado**, além do horário da próxima refeição.
 * **Navegação Semanal (Segunda a Sexta):** Seleção rápida entre os dias úteis da semana vigente com destaque automático para o dia atual.
-* **Exibição de Almoço e Jantar:** Listagem clara e visual das porções servidas em cada turno (`11h30 às 13h30` e `17h00 às 19h00`).
+* **Exibição de Almoço e Jantar:** Listagem clara e visual das porções servidas em cada turno (`11h às 13h30` e `17h00 às 18h30`).
 * **Aviso de Dias Não Letivos:** Exibição automática de justificativa em datas de feriados, recessos ou paralisações.
 * **Compartilhamento Rápido:** Botão integrado para enviar o cardápio formatado diretamente via **WhatsApp** ou compartilhar o link nativamente.
 * **SEO Otimizado:** Renderização no servidor (SSR) e dados estruturados (`Schema.org / FoodEstablishment`).

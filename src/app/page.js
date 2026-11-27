@@ -73,14 +73,14 @@ export default async function HomePage() {
       {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '11:30',
+        opens: '11:00',
         closes: '13:30',
       },
       {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         opens: '17:00',
-        closes: '19:00',
+        closes: '18:30',
       },
     ],
   };

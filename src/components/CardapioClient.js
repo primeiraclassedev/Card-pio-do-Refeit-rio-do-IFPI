@@ -96,10 +96,10 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
       const currentISO = formatDateISO(now);
 
       const clock = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      const ALMOCO_INICIO = 11 * 60 + 30;
+      const ALMOCO_INICIO = 11 * 60 + 0;
       const ALMOCO_FIM = 13 * 60 + 30;
       const JANTAR_INICIO = 17 * 60;
-      const JANTAR_FIM = 19 * 60;
+      const JANTAR_FIM = 18 * 60 + 30;
 
       const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
       const isNonSchoolToday = Boolean(nonSchoolDays[currentISO]);
@@ -108,7 +108,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
         setStatus({
           isOpen: false,
           badgeText: 'Fechado Hoje',
-          messageText: `Dia não letivo (${nonSchoolDays[currentISO]}). Próxima refeição no próximo dia útil às 11h30.`,
+          messageText: `Dia não letivo (${nonSchoolDays[currentISO]}). Próxima refeição no próximo dia útil às 11h.`,
           iconClass: 'bi-calendar-x',
           clock,
         });
@@ -125,7 +125,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
           setStatus({
             isOpen: true,
             badgeText: 'Aberto Agora',
-            messageText: 'Servindo: Jantar (encerra às 19h00)',
+            messageText: 'Servindo: Jantar (encerra às 18h30)',
             iconClass: 'bi-moon-stars-fill',
             clock,
           });
@@ -133,7 +133,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
           setStatus({
             isOpen: false,
             badgeText: 'Fechado no Momento',
-            messageText: 'Próxima refeição: Almoço hoje às 11h30',
+            messageText: 'Próxima refeição: Almoço hoje às 11h',
             iconClass: 'bi-hourglass-split',
             clock,
           });
@@ -151,8 +151,8 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
             badgeText: 'Fechado no Momento',
             messageText:
               dayOfWeek === 5
-                ? 'Próxima refeição: Almoço na segunda-feira às 11h30'
-                : 'Próxima refeição: Almoço amanhã às 11h30',
+                ? 'Próxima refeição: Almoço na segunda-feira às 11h'
+                : 'Próxima refeição: Almoço amanhã às 11h',
             iconClass: 'bi-moon',
             clock,
           });
@@ -161,7 +161,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
         setStatus({
           isOpen: false,
           badgeText: 'Fechado (Fim de Semana)',
-          messageText: 'Próxima refeição: Almoço na segunda-feira às 11h30',
+          messageText: 'Próxima refeição: Almoço na segunda-feira às 11h',
           iconClass: 'bi-calendar2-week',
           clock,
         });
@@ -198,7 +198,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
         ? jantarPortions.map((p) => `• ${p.nome}`).join('\n')
         : '_Não há refeição cadastrada_';
 
-    return `${header}☀️ *Almoço (11h30 às 13h30):*\n${almocoItens}\n\n🌙 *Jantar (17h00 às 19h00):*\n${jantarItens}\n\n📲 Acesse o cardápio completo: ${url}`;
+    return `${header}☀️ *Almoço (11h às 13h30):*\n${almocoItens}\n\n🌙 *Jantar (17h00 às 18h30):*\n${jantarItens}\n\n📲 Acesse o cardápio completo: ${url}`;
   }
 
   function handleWhatsappShare() {
@@ -278,10 +278,10 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
               </div>
               <div className="text-md-end border-top border-md-0 pt-2 pt-md-0 w-100 w-md-auto">
                 <small className="text-muted d-block">
-                  <i className="bi bi-sun text-warning me-1"></i>Almoço: <strong>11h30 às 13h30</strong>
+                  <i className="bi bi-sun text-warning me-1"></i>Almoço: <strong>11h às 13h30</strong>
                 </small>
                 <small className="text-muted d-block">
-                  <i className="bi bi-moon-stars text-primary me-1"></i>Jantar: <strong>17h00 às 19h00</strong>
+                  <i className="bi bi-moon-stars text-primary me-1"></i>Jantar: <strong>17h00 às 18h30</strong>
                 </small>
               </div>
             </div>
@@ -337,7 +337,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
                     <i className="bi bi-brightness-high-fill fs-5"></i>
                     <h3 className="h5 mb-0 fw-bold">Almoço</h3>
                   </div>
-                  <span className="badge bg-white text-ifpi-dark fw-semibold">11h30 – 13h30</span>
+                  <span className="badge bg-white text-ifpi-dark fw-semibold">11h – 13h30</span>
                 </div>
                 <div className="card-body p-4 d-flex flex-column justify-content-between">
                   {almocoPortions.length > 0 ? (
@@ -369,7 +369,7 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
                     <i className="bi bi-moon-stars-fill fs-5"></i>
                     <h3 className="h5 mb-0 fw-bold">Jantar</h3>
                   </div>
-                  <span className="badge bg-white text-ifpi-dark fw-semibold">17h00 – 19h00</span>
+                  <span className="badge bg-white text-ifpi-dark fw-semibold">17h00 – 18h30</span>
                 </div>
                 <div className="card-body p-4 d-flex flex-column justify-content-between">
                   {jantarPortions.length > 0 ? (
@@ -437,8 +437,8 @@ export default function CardapioClient({ initialMeals, nonSchoolDays }) {
               <i className="bi bi-clock-history me-1"></i> Horário de Funcionamento do Refeitório
             </p>
             <p className="small opacity-75 mb-0">
-              De segunda a sexta-feira: <strong>11h30 às 13h30</strong> (Almoço) |{' '}
-              <strong>17h00 às 19h00</strong> (Jantar)
+              De segunda a sexta-feira: <strong>11h às 13h30</strong> (Almoço) |{' '}
+              <strong>17h00 às 18h30</strong> (Jantar)
             </p>
           </div>
 

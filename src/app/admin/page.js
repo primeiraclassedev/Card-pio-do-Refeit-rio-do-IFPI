@@ -397,8 +397,8 @@ export default function AdminPage() {
                           onChange={(e) => setMealType(e.target.value)}
                           required
                         >
-                          <option value="almoco">Almoço (11h30–13h30)</option>
-                          <option value="jantar">Jantar (17h00–19h00)</option>
+                          <option value="almoco">Almoço (11h–13h30)</option>
+                          <option value="jantar">Jantar (17h00–18h30)</option>
                         </select>
                       </div>
                     </div>
