@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 const AVAILABLE_ICONS = [
-  'bi-egg-fried', 'bi-cup-hot', 'bi-cup-straw', 'bi-apple',
-  'bi-fire', 'bi-flower1', 'bi-stars', 'bi-circle-half',
-  'bi-bezier2', 'bi-droplet-fill', 'bi-heart-fill', 'bi-award',
-  'bi-basket2-fill', 'bi-brightness-high', 'bi-check2-circle', 'bi-bookmark-star',
+  'bi-egg-fried', 'bi-fork-knife', 'bi-cup-hot', 'bi-cup-straw',
+  'bi-apple', 'bi-fire', 'bi-flower1', 'bi-stars',
+  'bi-circle-half', 'bi-bezier2', 'bi-droplet-fill', 'bi-heart-fill',
+  'bi-award', 'bi-basket2-fill', 'bi-brightness-high', 'bi-bookmark-star',
 ];
 
 function getTeresinaNow() {
@@ -37,25 +37,52 @@ function formatDateBR(isoDate) {
   return `${dias[dateObj.getDay()]} (${d}/${m}/${y})`;
 }
 
+function normalizeText(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
-  const weekRange = useMemo(() => {
+  // Calcula semana atual e semana seguinte no fuso de Teresina
+  const weeksInfo = useMemo(() => {
     const now = getTeresinaNow();
     const day = now.getDay();
     const diffToMonday = day === 0 ? -6 : 1 - day;
-    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
-    const friday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4);
+
+    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+    const currentFriday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + 4);
+
+    const nextMonday = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), currentMonday.getDate() + 7);
+    const nextFriday = new Date(nextMonday.getFullYear(), nextMonday.getMonth(), nextMonday.getDate() + 4);
+
     const toBR = (iso) => {
       const [y, m, d] = iso.split('-');
       return `${d}/${m}/${y}`;
     };
-    return { start: toISO(monday), end: toISO(friday), today: toISO(now), toBR };
+
+    return {
+      today: toISO(now),
+      current: {
+        start: toISO(currentMonday),
+        end: toISO(currentFriday),
+        label: `${toBR(toISO(currentMonday))} a ${toBR(toISO(currentFriday))}`,
+      },
+      next: {
+        start: toISO(nextMonday),
+        end: toISO(nextFriday),
+        label: `${toBR(toISO(nextMonday))} a ${toBR(toISO(nextFriday))}`,
+      },
+    };
   }, []);
 
-  // Abas e Feedback
+  // Abas, filtro de semana e Feedback
   const [activeTab, setActiveTab] = useState('refeicoes');
+  const [weekFilter, setWeekFilter] = useState('current'); // 'current' | 'next' | 'all'
   const [feedback, setFeedback] = useState(null);
 
   // Dados carregados do Supabase
@@ -65,9 +92,10 @@ export default function AdminPage() {
 
   // Estados do formulário de Refeição
   const [editingMealId, setEditingMealId] = useState('');
-  const [mealDate, setMealDate] = useState(weekRange.today);
+  const [mealDate, setMealDate] = useState(weeksInfo.today);
   const [mealType, setMealType] = useState('almoco');
   const [selectedPortions, setSelectedPortions] = useState([]);
+  const [portionSearch, setPortionSearch] = useState('');
   const [savingMeal, setSavingMeal] = useState(false);
 
   // Estados do formulário de Porção
@@ -99,8 +127,8 @@ export default function AdminPage() {
             porcoes ( id, nome, icone )
           )
         `)
-        .gte('data', weekRange.start)
-        .lte('data', weekRange.end)
+        .gte('data', weeksInfo.current.start)
+        .lte('data', weeksInfo.next.end)
         .order('data', { ascending: true })
         .order('tipo', { ascending: true }),
       supabase.from('dias_nao_letivos').select('*').order('data', { ascending: false }),
@@ -109,11 +137,29 @@ export default function AdminPage() {
     if (portionsRes.data) setPortions(portionsRes.data);
     if (mealsRes.data) setMeals(mealsRes.data);
     if (nonSchoolRes.data) setNonSchoolDays(nonSchoolRes.data);
-  }, [supabase, weekRange.start, weekRange.end]);
+  }, [supabase, weeksInfo.current.start, weeksInfo.next.end]);
 
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
+
+  // Filtra as porções na caixa de busca (sem perder acentos)
+  const filteredPortions = useMemo(() => {
+    const query = normalizeText(portionSearch.trim());
+    if (!query) return portions;
+    return portions.filter((p) => normalizeText(p.nome).includes(query));
+  }, [portions, portionSearch]);
+
+  // Filtra as refeições exibidas conforme a semana selecionada
+  const displayedMeals = useMemo(() => {
+    if (weekFilter === 'current') {
+      return meals.filter((m) => m.data >= weeksInfo.current.start && m.data <= weeksInfo.current.end);
+    }
+    if (weekFilter === 'next') {
+      return meals.filter((m) => m.data >= weeksInfo.next.start && m.data <= weeksInfo.next.end);
+    }
+    return meals;
+  }, [meals, weekFilter, weeksInfo]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -133,14 +179,16 @@ export default function AdminPage() {
     setMealDate(meal.data);
     setMealType(meal.tipo);
     setSelectedPortions(meal.refeicao_porcoes.map((rp) => rp.porcao_id));
+    setPortionSearch('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function resetMealForm() {
     setEditingMealId('');
-    setMealDate(weekRange.today);
+    setMealDate(weekFilter === 'next' ? weeksInfo.next.start : weeksInfo.today);
     setMealType('almoco');
     setSelectedPortions([]);
+    setPortionSearch('');
   }
 
   async function handleSaveMeal(e) {
@@ -189,6 +237,11 @@ export default function AdminPage() {
 
       const { error: relErr } = await supabase.from('refeicao_porcoes').insert(relations);
       if (relErr) throw relErr;
+
+      // Se o usuário cadastrou uma refeição para a semana seguinte, muda o filtro automaticamente para ela
+      if (mealDate >= weeksInfo.next.start && mealDate <= weeksInfo.next.end && weekFilter === 'current') {
+        setWeekFilter('next');
+      }
 
       notify(editingMealId ? 'Refeição atualizada com sucesso!' : 'Refeição cadastrada no cardápio!');
       resetMealForm();
@@ -323,7 +376,7 @@ export default function AdminPage() {
               onClick={() => setActiveTab('refeicoes')}
               className={`nav-link w-100 rounded-3 ${activeTab === 'refeicoes' ? 'active' : ''}`}
             >
-              <i className="bi bi-calendar-check me-1"></i> Refeições da Semana
+              <i className="bi bi-calendar-check me-1"></i> Refeições
             </button>
           </li>
           <li className="nav-item flex-fill text-center">
@@ -364,7 +417,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={resetMealForm}
-                      className="btn btn-sm btn-link text-danger text-decoration-none"
+                      className="btn btn-sm btn-link text-danger text-decoration-none p-0"
                     >
                       Cancelar edição
                     </button>
@@ -410,23 +463,54 @@ export default function AdminPage() {
                           {selectedPortions.length} selecionada{selectedPortions.length === 1 ? '' : 's'}
                         </span>
                       </div>
-                      <div className="row g-2" style={{ maxHeight: '310px', overflowY: 'auto' }}>
-                        {portions.map((p) => {
-                          const checked = selectedPortions.includes(p.id);
-                          return (
-                            <div key={p.id} className="col-12 col-sm-6">
-                              <div
-                                onClick={() => togglePortionSelection(p.id)}
-                                className={`portion-check-card d-flex align-items-center gap-2 ${
-                                  checked ? 'selected-card' : ''
-                                }`}
-                              >
-                                <i className={`bi ${p.icone} text-ifpi-green`}></i>
-                                <span className="small text-truncate">{p.nome}</span>
+
+                      {/* Caixa de Busca de Porções */}
+                      <div className="input-group input-group-sm mb-2">
+                        <span className="input-group-text bg-light border-end-0">
+                          <i className="bi bi-search text-muted"></i>
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0 ps-0"
+                          placeholder="Buscar porção por nome (ex: arroz, frango, salada)..."
+                          value={portionSearch}
+                          onChange={(e) => setPortionSearch(e.target.value)}
+                        />
+                        {portionSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setPortionSearch('')}
+                            className="btn btn-outline-secondary"
+                            title="Limpar busca"
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="row g-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        {filteredPortions.length === 0 ? (
+                          <div className="col-12 text-center py-3 text-muted small">
+                            Nenhuma porção encontrada para &ldquo;{portionSearch}&rdquo;.
+                          </div>
+                        ) : (
+                          filteredPortions.map((p) => {
+                            const checked = selectedPortions.includes(p.id);
+                            return (
+                              <div key={p.id} className="col-12 col-sm-6">
+                                <div
+                                  onClick={() => togglePortionSelection(p.id)}
+                                  className={`portion-check-card d-flex align-items-center gap-2 ${
+                                    checked ? 'selected-card' : ''
+                                  }`}
+                                >
+                                  <i className={`bi ${p.icone} text-ifpi-green`}></i>
+                                  <span className="small text-truncate">{p.nome}</span>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        )}
                       </div>
                     </div>
 
@@ -445,37 +529,85 @@ export default function AdminPage() {
 
             <div className="col-12 col-lg-7">
               <div className="card border-0 shadow-sm rounded-4">
-                <div className="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
-                  <h2 className="h6 fw-bold mb-0 text-ifpi-dark">
-                    <i className="bi bi-list-ul text-ifpi-green me-1"></i> Refeições Cadastradas (Semana Vigente)
-                  </h2>
-                  <span className="badge bg-light text-dark border">
-                    {weekRange.toBR(weekRange.start)} a {weekRange.toBR(weekRange.end)}
-                  </span>
+                <div className="card-header bg-white border-bottom py-3 px-4">
+                  <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                    <div>
+                      <h2 className="h6 fw-bold mb-0 text-ifpi-dark">
+                        <i className="bi bi-list-ul text-ifpi-green me-1"></i> Refeições Cadastradas
+                      </h2>
+                      <small className="text-muted">
+                        {weekFilter === 'current' && `Semana Vigente: ${weeksInfo.current.label}`}
+                        {weekFilter === 'next' && `Próxima Semana: ${weeksInfo.next.label}`}
+                        {weekFilter === 'all' && 'Exibindo Semana Vigente e Próxima Semana'}
+                      </small>
+                    </div>
+
+                    {/* Seletor de Semana */}
+                    <div className="btn-group btn-group-sm" role="group" aria-label="Filtro de semana">
+                      <button
+                        type="button"
+                        onClick={() => setWeekFilter('current')}
+                        className={`btn ${
+                          weekFilter === 'current' ? 'bg-ifpi-green text-white fw-semibold' : 'btn-outline-secondary'
+                        }`}
+                      >
+                        Atual
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWeekFilter('next')}
+                        className={`btn ${
+                          weekFilter === 'next' ? 'bg-ifpi-green text-white fw-semibold' : 'btn-outline-secondary'
+                        }`}
+                      >
+                        Próxima Semana
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWeekFilter('all')}
+                        className={`btn ${
+                          weekFilter === 'all' ? 'bg-ifpi-green text-white fw-semibold' : 'btn-outline-secondary'
+                        }`}
+                      >
+                        Todas
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="card-body p-4">
-                  {meals.length === 0 ? (
+                  {displayedMeals.length === 0 ? (
                     <div className="text-center py-4 text-muted">
                       <i className="bi bi-calendar2-plus fs-2 d-block mb-2"></i>
-                      Nenhuma refeição cadastrada para a semana vigente.
+                      {weekFilter === 'next'
+                        ? 'Nenhuma refeição cadastrada para a próxima semana.'
+                        : 'Nenhuma refeição cadastrada para este período.'}
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-3">
-                      {meals.map((meal) => {
+                      {displayedMeals.map((meal) => {
                         const isAlmoco = meal.tipo === 'almoco';
+                        const isNextWeek = meal.data >= weeksInfo.next.start;
                         const mealPortions = meal.refeicao_porcoes.map((rp) => rp.porcoes).filter(Boolean);
                         return (
                           <div key={meal.id} className="border rounded-4 p-3 bg-light">
                             <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
                               <div>
-                                <span className={`badge ${isAlmoco ? 'bg-ifpi-green' : 'bg-ifpi-dark'} mb-1`}>
-                                  <i
-                                    className={`bi ${
-                                      isAlmoco ? 'bi-brightness-high-fill' : 'bi-moon-stars-fill'
-                                    } me-1`}
-                                  ></i>
-                                  {isAlmoco ? 'Almoço' : 'Jantar'}
-                                </span>
+                                <div className="d-flex align-items-center gap-1 flex-wrap mb-1">
+                                  <span className={`badge ${isAlmoco ? 'bg-ifpi-green' : 'bg-ifpi-dark'}`}>
+                                    <i
+                                      className={`bi ${
+                                        isAlmoco ? 'bi-brightness-high-fill' : 'bi-moon-stars-fill'
+                                      } me-1`}
+                                    ></i>
+                                    {isAlmoco ? 'Almoço' : 'Jantar'}
+                                  </span>
+                                  {weekFilter === 'all' && (
+                                    <span className="badge bg-white text-secondary border">
+                                      {isNextWeek ? 'Próxima Semana' : 'Semana Atual'}
+                                    </span>
+                                  )}
+                                </div>
                                 <h3 className="h6 fw-bold mb-0">{formatDateBR(meal.data)}</h3>
                               </div>
                               <div className="d-flex gap-1">
